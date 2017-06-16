@@ -24,16 +24,16 @@ class Ensemble(BaggingClassifier):
         self.M = n_estimators
         self.h = [ copy.deepcopy(base_estimator) for m in range(self.M) ]
 
-    def fit(self, X, Y):
+    def fit(self, X, Y, *args, **kwargs):
         '''
             Simply fit each model individually.
         '''
         N,self.L = Y.shape
         for m in range(self.M):
-            self.h[m].fit(X,Y)
+            self.h[m].fit(X,Y, *args, **kwargs)
         return self
 
-    def predict(self, X):
+    def predict(self, X, *args, **kwargs):
         '''
             return predictions for X 
             (multi-dimensionally speaking, i.e., we return the mode)
@@ -43,7 +43,7 @@ class Ensemble(BaggingClassifier):
         for i in range(N):
             V = zeros((self.M,self.L))
             for m in range(self.M):
-                V[m,:] = self.h[m].predict(array([X[i,:]]))
+                V[m,:] = self.h[m].predict(array([X[i,:]]), *args, **kwargs)
             Y[i,:] = mode(V)[0]
         return Y
 

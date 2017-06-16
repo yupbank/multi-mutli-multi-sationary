@@ -1,6 +1,7 @@
 from numpy import *
 import copy
 from sklearn.linear_model import LogisticRegression, SGDClassifier
+import numpy as np
 
 class CC() :
     '''
@@ -86,6 +87,38 @@ class RCC(CC):
         Y = CC.predict(self,X)
         return Y[:,argsort(self.chain)]
 
+class FCC(CC):
+
+    def fit(self, X, Y, learn=True):
+        N, self.L = Y.shape
+        N, D = X.shape
+
+        self.h = [ copy.deepcopy(self.hop) for j in range(self.L)]
+        XY = zeros((N, D + self.L))
+        XY[:,0:D] = X
+        XY[:,D:] = Y[:,0:self.L]
+        for j in range(self.L):
+            tmp_XY = np.copy(XY)
+            if learn:
+                tmp_XY[:, D+j] = 0
+            self.h[j].fit(tmp_XY, Y[:,j])
+
+    def predict(self, X, round_iter):
+        '''
+            return predictions for X
+        '''
+        N, D = X.shape
+        Y = zeros((N, self.L))
+
+        for j in range(self.L):
+            t_X = column_stack([X, Y])
+            Y[:,j] = self.h[j].predict(t_X)
+        for i in xrange(round_iter):
+            for j in range(self.L):
+                t_X = column_stack([X, Y])
+                Y[:,j] = self.h[j].predict(t_X)
+
+        return Y
 
 def demo():
     #from molearn.core.tools import make_XOR_dataset

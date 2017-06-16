@@ -24,7 +24,7 @@ Y_train = Y[0:N_train,:]
 X_test = X[N_train:N,:]
 Y_test = Y[N_train:N,:]
 
-h = linear_model.LogisticRegression()
+h = linear_model.LogisticRegression(random_state=42)
 br = BR(L,h)
 cc = CC(L,h)
 
@@ -43,11 +43,43 @@ print(clock() - t0)
 
 from sklearn.tree import DecisionTreeClassifier
 from molearn.classifiers.Ensemble import Ensemble
-from molearn.classifiers.CC import RCC
-ecc = Ensemble(base_estimator=RCC(DecisionTreeClassifier()),n_estimators=10)
+from molearn.classifiers.CC import RCC, FCC
+ecc = Ensemble(base_estimator=RCC(h),n_estimators=10)
 t0 = clock()
 ecc.fit(X_train,Y_train)         
 print("ECC",)
 print(metrics.Exact_match(Y_test,ecc.predict(X_test)),)
 print(metrics.Hamming_loss(Y_test,ecc.predict(X_test)),)
+print(clock() - t0)
+
+fcc = Ensemble(base_estimator=FCC(h),n_estimators=10)
+t0 = clock()
+fcc.fit(X_train,Y_train)         
+print("FCC, round-1",)
+print(metrics.Exact_match(Y_test,fcc.predict(X_test, round_iter=1)),)
+print(metrics.Hamming_loss(Y_test,fcc.predict(X_test, round_iter=1)),)
+print(clock() - t0)
+
+fcc = Ensemble(base_estimator=FCC(h),n_estimators=10)
+t0 = clock()
+fcc.fit(X_train,Y_train)         
+print("FCC, round-5",)
+print(metrics.Exact_match(Y_test,fcc.predict(X_test, round_iter=5)),)
+print(metrics.Hamming_loss(Y_test,fcc.predict(X_test, round_iter=5)),)
+print(clock() - t0)
+
+fcc = Ensemble(base_estimator=FCC(h),n_estimators=10)
+t0 = clock()
+fcc.fit(X_train,Y_train, learn=False)         
+print("FCC, round-1, Learn",)
+print(metrics.Exact_match(Y_test,fcc.predict(X_test, round_iter=1)),)
+print(metrics.Hamming_loss(Y_test,fcc.predict(X_test, round_iter=1)),)
+print(clock() - t0)
+
+fcc = Ensemble(base_estimator=FCC(h),n_estimators=10)
+t0 = clock()
+fcc.fit(X_train,Y_train, learn=False)         
+print("FCC, round-5, Learn",)
+print(metrics.Exact_match(Y_test,fcc.predict(X_test, round_iter=5)),)
+print(metrics.Hamming_loss(Y_test,fcc.predict(X_test, round_iter=5)),)
 print(clock() - t0)
